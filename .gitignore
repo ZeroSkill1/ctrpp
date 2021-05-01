@@ -1,0 +1,7 @@
+.vscode/*
+test/.vscode/*
+test/ctrpp-test
+*.a
+*.d
+*.o
+*.bin
