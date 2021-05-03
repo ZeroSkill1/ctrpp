@@ -43,6 +43,15 @@ int main(int argc, char *argv[])
 		{
 			std::cout << "verification failed\n";
 		}
+
+		if (exefs.export_entry(argv[2], "icon"))
+		{
+			std::cout << "icon written success\n";
+		}
+		else
+		{
+			std::cout << "icon write failed\n";
+		}
 	}
 	else
 	{

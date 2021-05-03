@@ -16,8 +16,6 @@ namespace ctrpp
 	{
 		namespace ExeFS
 		{
-			#define BUF_SIZE 16384
-
 			static const u8 empty_exefs_entry[0x10] =
 			{
 				0x00, 0x00, 0x00, 0x00,
@@ -52,9 +50,7 @@ namespace ctrpp
 
 				bool success_parsed;
 
-				u32 write_entry_to_buffer(u8 *buffer, const char *entry_name);
-				u32 write_entry_to_file(const char *filename, const char *entry_name);
-
+				bool export_entry(const char *filename, const char *entry_name);
 				bool verify();
 
 				~ExeFS();

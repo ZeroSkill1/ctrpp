@@ -55,64 +55,55 @@ failed:
 bool ctrpp::types::ExeFS::ExeFS::verify()
 {
 	u8 hashcount = 9;
-	u8 *buf = new u8[BUF_SIZE];
 	u8 *hash = new u8[0x20];
 
 	for (u32 i = 0; i < this->file_entries.size(); i++)
 	{
-		SHA256_CTX ctx = SHA256_CTX();
-		if (!SHA256_Init(&ctx))
-		{
+		if (!ctrpp::util::hash::sha256::hash_file_part(this->exefs_f, hash, sizeof(exefs_header) + this->file_entries[i]->file_offset, this->file_entries[i]->file_size))
 			goto failed;
-		}
-
-		if (fseek(this->exefs_f, this->file_entries[i]->file_offset + sizeof(exefs_header), 0) == -1)
-		{
-			goto failed;
-		}
-
-		int remaining = this->file_entries[i]->file_size;
-		int read = 0;
-
-		int to_read = ((remaining - BUF_SIZE) < 0) ? remaining : BUF_SIZE;
-
-		while ((read = fread(buf, 1, to_read, this->exefs_f)) > 0)
-		{
-			if (read != to_read)
-			{
-				goto failed;
-			}
-
-			if (!SHA256_Update(&ctx, buf, to_read))
-			{
-				goto failed;
-			}
-
-			remaining -= read;
-			to_read = ((remaining - BUF_SIZE) < 0) ? remaining : BUF_SIZE;
-		}
-
-		if (!SHA256_Final(hash, &ctx))
-		{
-			goto failed;
-		}
 
 		if (memcmp(this->header->file_hashes[hashcount], hash, 0x20) != 0)
-		{
 			goto failed;
-		}
 
 		hashcount--;
 	}
 
-	delete[] buf;
 	delete[] hash;
 	return true;
 
 failed:
-	delete[] buf;
 	delete[] hash;
 	return false;
+}
+
+bool ctrpp::types::ExeFS::ExeFS::export_entry(const char *filename, const char *entry_name)
+{
+	u32 len = strlen(entry_name);
+
+	if (len > 8)
+	{
+		return false;
+	}
+
+	bool found = false;
+	exefs_file_entry *entry;
+
+	for (u32 i = 0; i < this->file_entries.size(); i++)
+	{
+		if (strncmp(entry_name, this->file_entries[i]->file_name, len) == 0)
+		{
+			entry = this->file_entries[i];
+			found = true;
+			break;
+		}
+	}
+
+	if (!found)
+	{
+		return found;
+	}
+	
+	return util::io::copy_file_part_buffered(this->exefs_f, filename, sizeof(exefs_header) + entry->file_offset, entry->file_size, false, true);
 }
 
 ctrpp::types::ExeFS::ExeFS::~ExeFS()
