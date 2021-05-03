@@ -25,7 +25,7 @@ namespace ctrpp
 		u32 round_align_32(u32 in, u32 align);
 		u32 round_align_64(u64 in, u32 align);
 		void print_unicode(char16 *data, u32 length);
-		bool check_file(const char *filename, struct stat *out);
+		long check_file(const char *filename);
 	}
 }
 

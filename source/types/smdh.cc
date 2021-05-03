@@ -6,10 +6,13 @@ ctrpp::types::SMDH::SMDH::SMDH()
 
 ctrpp::types::SMDH::SMDH::SMDH(const char *filename)
 {
-	struct stat *st = nullptr;
+	long siz = 0;
 	FILE *smdh = nullptr;
 
-	if (!ctrpp::util::check_file(filename, st))
+	if ((siz = ctrpp::util::check_file(filename)) == -1)
+		goto failed;
+
+	if (siz != sizeof(smdh_data))
 		goto failed;
 
 	smdh = fopen(filename, "r");
@@ -22,7 +25,6 @@ ctrpp::types::SMDH::SMDH::SMDH(const char *filename)
 	if(!fread(this->raw_smdh_data, 1, sizeof(smdh_data), smdh))
 		goto failed;
 
-	delete st;
 	fclose(smdh);
 
 	this->success_parsed = true;
@@ -30,8 +32,6 @@ ctrpp::types::SMDH::SMDH::SMDH(const char *filename)
 	return;
 
 failed:
-
-	delete st;
 
 	if (smdh != nullptr)
 		fclose(smdh);

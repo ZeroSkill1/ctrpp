@@ -31,19 +31,22 @@ void ctrpp::util::print_unicode(char16 *data, u32 length)
 	std::u16string unc = std::u16string(data, length);
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> conv;
 
-	std::cout << conv.to_bytes(unc) << std::endl;
+	std::cout << conv.to_bytes(unc) << "\n";
 }
 
-bool check_file(const char *filename, struct stat *out)
+long ctrpp::util::check_file(const char *filename)
 {
 	struct stat *st = new struct stat;
+	long ret = -1;
 
-	if (!stat(filename, st))
-		return false;
+	if (stat(filename, st) == 0)
+	{
+		if (!S_ISDIR(st->st_mode))
+		{
+			ret = st->st_size;
+		}
+	}
 
-	if (S_ISDIR(st->st_mode))
-		return false;
-
-	out = st;
-	return true;
+	delete st;
+	return ret;
 }

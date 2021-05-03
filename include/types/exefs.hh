@@ -2,7 +2,6 @@
 #define __exefs_hh
 
 #include <openssl/sha.h>
-#include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -17,6 +16,8 @@ namespace ctrpp
 	{
 		namespace ExeFS
 		{
+			#define BUF_SIZE 16384
+
 			static const u8 empty_exefs_entry[0x10] =
 			{
 				0x00, 0x00, 0x00, 0x00,
@@ -36,7 +37,7 @@ namespace ctrpp
 			{
 				exefs_file_entry file_entries[10];
 				u8 reserved[0x20];
-				u8 file_hashes[0x20][10];
+				u8 file_hashes[10][0x20];
 			} exefs_header;
 
 			class ExeFS

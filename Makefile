@@ -6,7 +6,7 @@ SOURCES		:=	source source/types
 TARGET		:=	libctrpp.a
 
 # Language settings
-CFLAGS	:=	-Wall -O2 -std=c++17
+CFLAGS	:=	-g -Wall -O2 -std=c++17
 BUILD	:=	build
 CXX		:=	g++
 CC		:=	gcc

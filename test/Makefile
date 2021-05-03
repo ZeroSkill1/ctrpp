@@ -1,12 +1,12 @@
 
 # Program settings
 INCLUDES	:=	include ../include
-LIBRARIES	:= -L.. -lctrpp
+LIBRARIES	:= -L.. -lctrpp -lcrypto -lssl
 SOURCES		:=	source
 TARGET		:= ctrpp-test
 
 # Language settings
-CFLAGS	:=	-Wall -O2 -std=c++17
+CFLAGS	:=	-g -Wall -O2 -std=c++17
 BUILD	:=	build
 CXX		:=	g++
 CC		:=	gcc
