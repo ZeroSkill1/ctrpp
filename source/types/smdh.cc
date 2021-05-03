@@ -1,5 +1,4 @@
 #include <types/smdh.hh>
-#include <sys/stat.h>
 
 ctrpp::types::SMDH::SMDH::SMDH()
 {
@@ -7,13 +6,10 @@ ctrpp::types::SMDH::SMDH::SMDH()
 
 ctrpp::types::SMDH::SMDH::SMDH(const char *filename)
 {
-	struct stat *st = new struct stat;
+	struct stat *st = nullptr;
 	FILE *smdh = nullptr;
 
-	if (stat(filename, st) != 0)
-		goto failed;
-
-	if (st->st_size != sizeof(smdh_data))
+	if (!ctrpp::util::check_file(filename, st))
 		goto failed;
 
 	smdh = fopen(filename, "r");

@@ -1,36 +1,37 @@
-#include <types/smdh.hh>
+#include <types/exefs.hh>
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
 #include <util.hh>
 
-using namespace ctrpp;
+using namespace ctrpp::types::ExeFS;
 
 int main(int argc, char *argv[])
 {
 	if (argc < 2)
 	{
-		std::cout << "no arguments provided!" << std::endl;
+		std::cout << "no arguments provided!\n";
 		return -1;
 	}
 
-	ctrpp::types::SMDH::SMDH smdh(argv[1]);
+	ExeFS exefs = ExeFS(argv[1]);
 
-	if (smdh.success_parsed)
+	if (exefs.success_parsed)
 	{
-		std::cout << "ok!" << std::endl;
+		std::cout << "ok!\n";
 		
-		ctrpp::util::print_unicode(smdh.raw_smdh_data->title_names[1].short_desc, 0x40);
-
-		char hex[9];
-
-		snprintf(hex, 9, "%08x", smdh.region_lockout());
-
-		std::cout << "flag: 0x" << hex << std::endl;
+		for (u32 i = 0; i < exefs.file_entries.size(); i++)
+		{
+			std::cout << "FILE ENTRY:\n\n";
+			std::cout << "Name: " << exefs.file_entries[i]->file_name << "\n";
+			std::cout << "Offset: 0x" << std::hex << exefs.file_entries[i]->file_offset << "\n";
+			std::cout << "Size: 0x" << std::hex << exefs.file_entries[i]->file_size << "\n";
+			std::cout << "\n===============================================================\n\n";
+		}
 	}
 	else
 	{
-		std::cout << "not ok!" << std::endl;
+		std::cout << "not ok!\n";
 	}
 
 	perror(strerror(errno));

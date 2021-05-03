@@ -24,7 +24,7 @@ namespace ctrpp
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 			};
 
-			typedef const enum class ContentTypeFlags
+			enum class ContentTypeFlags
 			{
 				Encrypted = 0x1,
 				Disc      = 0x2,

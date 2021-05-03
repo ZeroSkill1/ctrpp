@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include <ints.hh>
+#include <util.hh>
 
 namespace ctrpp
 {
@@ -12,7 +13,7 @@ namespace ctrpp
 	{
 		namespace SMDH
 		{
-			typedef const enum class SMDHRegionLockout
+			enum class SMDHRegionLockout
 			{
 				Japan     = 0x1,
 				USA       = 0x2,
@@ -23,7 +24,7 @@ namespace ctrpp
 				Taiwan    = 0x40
 			};
 
-			typedef const enum class SMDHFlags
+			enum class SMDHFlags
 			{
 				VisibleOnHomeMenu        = 0x1,
 				AutoBootGamecard         = 0x2,
