@@ -33,7 +33,7 @@ namespace ctrpp
 		{
 			namespace sha256
 			{
-				bool hash_file_part(FILE *f, u8 *out_hash, u32 offset, u32 size);
+				int hash_file_part(FILE *f, u8 *out_hash, u32 offset, u32 size);
 			}
 		}
 

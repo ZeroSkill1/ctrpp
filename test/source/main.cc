@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 			std::cout << "verification failed\n";
 		}
 
-		if (exefs.export_entry(argv[2], "icon"))
+		if (exefs.export_entry(argv[2], "icon") == 0)
 		{
 			std::cout << "icon written success\n";
 		}

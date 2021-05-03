@@ -59,7 +59,7 @@ bool ctrpp::types::ExeFS::ExeFS::verify()
 
 	for (u32 i = 0; i < this->file_entries.size(); i++)
 	{
-		if (!ctrpp::util::hash::sha256::hash_file_part(this->exefs_f, hash, sizeof(exefs_header) + this->file_entries[i]->file_offset, this->file_entries[i]->file_size))
+		if (ctrpp::util::hash::sha256::hash_file_part(this->exefs_f, hash, sizeof(exefs_header) + this->file_entries[i]->file_offset, this->file_entries[i]->file_size) != 0)
 			goto failed;
 
 		if (memcmp(this->header->file_hashes[hashcount], hash, 0x20) != 0)
@@ -76,7 +76,7 @@ failed:
 	return false;
 }
 
-bool ctrpp::types::ExeFS::ExeFS::export_entry(const char *filename, const char *entry_name)
+int ctrpp::types::ExeFS::ExeFS::export_entry(const char *filename, const char *entry_name)
 {
 	u32 len = strlen(entry_name);
 

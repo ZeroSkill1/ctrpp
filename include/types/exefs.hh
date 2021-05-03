@@ -49,7 +49,7 @@ namespace ctrpp
 
 				bool success_parsed;
 
-				bool export_entry(const char *filename, const char *entry_name);
+				int export_entry(const char *filename, const char *entry_name);
 				bool verify();
 
 				~ExeFS();

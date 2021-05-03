@@ -56,7 +56,7 @@ int get_remaining(int remaining)
 	return ((remaining - BUF_SIZE) < 0) ? remaining : BUF_SIZE;
 }
 
-bool ctrpp::util::hash::sha256::hash_file_part(FILE *f, u8 *out_hash, u32 offset, u32 size)
+int ctrpp::util::hash::sha256::hash_file_part(FILE *f, u8 *out_hash, u32 offset, u32 size)
 {
 	u8 *buf = new u8[BUF_SIZE];
 
