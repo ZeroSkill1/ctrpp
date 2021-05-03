@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 		std::cout << "ok!\n";
 
 		int hashcount = 9;
-		
+
 		for (u32 i = 0; i < exefs.file_entries.size(); i++)
 		{
 			std::cout << "FILE ENTRY:\n\n";

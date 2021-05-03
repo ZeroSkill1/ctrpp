@@ -22,7 +22,7 @@ ctrpp::types::SMDH::SMDH::SMDH(const char *filename)
 
 	this->raw_smdh_data = new smdh_data;
 
-	if(!fread(this->raw_smdh_data, 1, sizeof(smdh_data), smdh))
+	if (!fread(this->raw_smdh_data, 1, sizeof(smdh_data), smdh))
 		goto failed;
 
 	fclose(smdh);

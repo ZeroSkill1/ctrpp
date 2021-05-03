@@ -81,9 +81,7 @@ bool ctrpp::types::ExeFS::ExeFS::export_entry(const char *filename, const char *
 	u32 len = strlen(entry_name);
 
 	if (len > 8)
-	{
 		return false;
-	}
 
 	bool found = false;
 	exefs_file_entry *entry;
@@ -99,10 +97,8 @@ bool ctrpp::types::ExeFS::ExeFS::export_entry(const char *filename, const char *
 	}
 
 	if (!found)
-	{
 		return found;
-	}
-	
+
 	return util::io::copy_file_part_buffered(this->exefs_f, filename, sizeof(exefs_header) + entry->file_offset, entry->file_size, false, true);
 }
 
@@ -115,7 +111,5 @@ ctrpp::types::ExeFS::ExeFS::~ExeFS()
 		delete this->header;
 
 	for (u32 i = 0; i < this->file_entries.size(); i++)
-	{
 		delete this->file_entries[i];
-	}
 }

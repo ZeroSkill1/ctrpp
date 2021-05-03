@@ -25,7 +25,6 @@ ctrpp::types::Ticket::Ticket::Ticket(const char *filename)
 	if (!(this->signature->full_size > 0))
 		goto failed;
 
-
 	if (!fread(this->signature->sig, 1, this->signature->sig_size, tik))
 		goto failed;
 	if (!fread(this->signature->sig_padding, 1, this->signature->sig_padding_size, tik))
@@ -35,13 +34,10 @@ ctrpp::types::Ticket::Ticket::Ticket(const char *filename)
 
 	if (!fread(this->raw_ticket_data, 1, sizeof(ticket_data), tik))
 		goto failed;
-
 	if (!(streampos = ftell(tik)))
 		goto failed;
-
-	if (fseek(tik, streampos + 4, SEEK_SET) == -1) // seek to cindex size pos
-		goto failed;
-
+	if (fseek(tik, streampos + 4, SEEK_SET) == -1)
+		goto failed; // seek to cindex size pos
 	if (!fread(&cindex_size, 1, 4, tik))
 		goto failed;
 
@@ -51,7 +47,6 @@ ctrpp::types::Ticket::Ticket::Ticket(const char *filename)
 
 	if (fseek(tik, streampos, 0) == -1)
 		goto failed;
-
 	if (!fread(this->content_index->content_index_data, 1, this->content_index->size, tik))
 		goto failed;
 
@@ -61,7 +56,7 @@ ctrpp::types::Ticket::Ticket::Ticket(const char *filename)
 
 	return;
 
-	failed:
+failed:
 
 	if (tik != nullptr)
 		fclose(tik);
@@ -98,15 +93,16 @@ u32 ctrpp::types::Ticket::Ticket::eshop_account_id()
 
 ctrpp::types::Ticket::Ticket::~Ticket()
 {
-	if (!(this->signature == nullptr)) delete this->signature;
-	if (!(this->raw_ticket_data == nullptr)) delete this->raw_ticket_data;
-	if (!(this->content_index == nullptr)) delete this->content_index;
+	if (!(this->signature == nullptr))
+		delete this->signature;
+	if (!(this->raw_ticket_data == nullptr))
+		delete this->raw_ticket_data;
+	if (!(this->content_index == nullptr))
+		delete this->content_index;
 }
-
 
 ctrpp::types::Ticket::TicketContentIndex::TicketContentIndex()
 {
-
 }
 
 ctrpp::types::Ticket::TicketContentIndex::TicketContentIndex(u32 size)
@@ -117,5 +113,6 @@ ctrpp::types::Ticket::TicketContentIndex::TicketContentIndex(u32 size)
 
 ctrpp::types::Ticket::TicketContentIndex::~TicketContentIndex()
 {
-	if (!(this->content_index_data == nullptr)) delete [] this->content_index_data;
+	if (!(this->content_index_data == nullptr))
+		delete[] this->content_index_data;
 }

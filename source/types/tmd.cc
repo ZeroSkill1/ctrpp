@@ -28,7 +28,7 @@ ctrpp::types::TMD::TMD::TMD(const char *filename)
 	if (!fread(this->signature->sig, 1, this->signature->sig_size, f))
 		goto failed;
 	if (!fread(this->signature->sig_padding, 1, this->signature->sig_padding_size, f))
-		goto failed;	
+		goto failed;
 	this->raw_tmd_header_data = new tmd_header;
 	if (!fread(this->raw_tmd_header_data, 1, sizeof(tmd_header), f))
 		goto failed;
@@ -54,7 +54,7 @@ ctrpp::types::TMD::TMD::TMD(const char *filename)
 		}
 	}
 
-	delete [] cir_buf;
+	delete[] cir_buf;
 
 	//read content chunk records
 
@@ -68,7 +68,7 @@ ctrpp::types::TMD::TMD::TMD(const char *filename)
 		{
 			this->ContentChunkRecords.push_back(new ContentChunkRecord(chunk));
 		}
-		else 
+		else
 		{
 			delete chunk;
 			goto failed;
@@ -84,8 +84,8 @@ failed:
 	if (f != nullptr)
 		fclose(f);
 
-	if (cir_buf != nullptr) 
-		delete [] cir_buf;
+	if (cir_buf != nullptr)
+		delete[] cir_buf;
 
 	this->success_parsed = false;
 	return;
@@ -137,8 +137,10 @@ u16 ctrpp::types::TMD::TMD::boot_content()
 
 ctrpp::types::TMD::TMD::~TMD()
 {
-	if (this->raw_tmd_header_data != nullptr) delete this->raw_tmd_header_data;
-	if (this->signature != nullptr) delete this->signature;
+	if (this->raw_tmd_header_data != nullptr)
+		delete this->raw_tmd_header_data;
+	if (this->signature != nullptr)
+		delete this->signature;
 
 	for (u32 i = 0; i < this->ContentInfoRecords.size(); i++)
 	{
@@ -176,7 +178,8 @@ u16 ctrpp::types::TMD::ContentInfoRecord::content_command_count()
 
 ctrpp::types::TMD::ContentInfoRecord::~ContentInfoRecord()
 {
-	if (this->raw_info_record_data != nullptr) delete this->raw_info_record_data;
+	if (this->raw_info_record_data != nullptr)
+		delete this->raw_info_record_data;
 }
 
 //end content info record
@@ -184,7 +187,7 @@ ctrpp::types::TMD::ContentInfoRecord::~ContentInfoRecord()
 //start content chunk record
 
 ctrpp::types::TMD::ContentChunkRecord::ContentChunkRecord()
-{	
+{
 }
 
 ctrpp::types::TMD::ContentChunkRecord::ContentChunkRecord(tmd_content_chunk_record *chunk)
@@ -214,7 +217,8 @@ u64 ctrpp::types::TMD::ContentChunkRecord::content_size()
 
 ctrpp::types::TMD::ContentChunkRecord::~ContentChunkRecord()
 {
-	if (this->raw_chunk_record_data != nullptr) delete this->raw_chunk_record_data;
+	if (this->raw_chunk_record_data != nullptr)
+		delete this->raw_chunk_record_data;
 }
 
 //end content info record

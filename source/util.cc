@@ -88,11 +88,11 @@ bool ctrpp::util::hash::sha256::hash_file_part(FILE *f, u8 *out_hash, u32 offset
 		goto failed;
 
 	delete[] buf;
-	return true;
+	return 0;
 
 failed:
 	delete[] buf;
-	return false;
+	return -1;
 }
 
 int ctrpp::util::io::copy_file_part_buffered(FILE *in, FILE *out, u32 in_offset, u32 size, u32 out_offset, bool close_in, bool close_out)
@@ -122,11 +122,11 @@ int ctrpp::util::io::copy_file_part_buffered(FILE *in, FILE *out, u32 in_offset,
 	}
 
 	delete[] buf;
-	return true;
+	return 0;
 
 failed:
 	delete[] buf;
-	return false;
+	return -1;
 }
 
 int ctrpp::util::io::copy_file_part_buffered(FILE *in, const char *out, u32 offset, u32 size, bool close_in, bool close_out)
@@ -164,7 +164,7 @@ int ctrpp::util::io::copy_file_part_buffered(FILE *in, const char *out, u32 offs
 		fclose(out_f);
 
 	delete[] buf;
-	return true;
+	return 0;
 
 failed:
 	if (close_in)
@@ -174,5 +174,5 @@ failed:
 		fclose(out_f);
 
 	delete[] buf;
-	return false;
+	return -1;
 }
