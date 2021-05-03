@@ -12,29 +12,19 @@ ctrpp::types::SMDH::SMDH::SMDH(const char *filename)
 
 	if (stat(filename, st) != 0)
 		goto failed;
-	
-	printf("passed stat\n");
 
 	if (st->st_size != sizeof(smdh_data))
 		goto failed;
-
-	printf("passed stat verify\n");
 
 	smdh = fopen(filename, "r");
 
 	if (smdh == nullptr)
 		goto failed;
 
-	printf("passed open file\n");
-
 	this->raw_smdh_data = new smdh_data;
-
-	printf("allocated data mem\n");
 
 	if(!fread(this->raw_smdh_data, 1, sizeof(smdh_data), smdh))
 		goto failed;
-
-	printf("read file into data mem\n");
 
 	delete st;
 	fclose(smdh);
@@ -59,4 +49,34 @@ ctrpp::types::SMDH::SMDH::~SMDH()
 {
 	if (this->raw_smdh_data != nullptr)
 		delete this->raw_smdh_data;
+}
+
+u32 ctrpp::types::SMDH::SMDH::region_lockout()
+{
+	return _CTRPP_LE_U32(BYTES(this->raw_smdh_data->region_lockout));
+}
+
+u32 ctrpp::types::SMDH::SMDH::match_maker_id()
+{
+	return _CTRPP_LE_U32(BYTES(this->raw_smdh_data->match_maker_id));
+}
+
+u64 ctrpp::types::SMDH::SMDH::match_maker_bit_id()
+{
+	return _CTRPP_LE_U64(BYTES(this->raw_smdh_data->match_maker_bit_id));
+}
+
+u16 ctrpp::types::SMDH::SMDH::eula_version()
+{
+	return _CTRPP_LE_U16(BYTES(this->raw_smdh_data->eula_version));
+}
+
+float ctrpp::types::SMDH::SMDH::default_banner_animation_frame()
+{
+	return ints::le_float(BYTES(this->raw_smdh_data->default_banner_animation_frame));
+}
+
+u32 ctrpp::types::SMDH::SMDH::cec_id()
+{
+	return _CTRPP_LE_U32(BYTES(this->raw_smdh_data->cec_id));
 }

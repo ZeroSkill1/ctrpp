@@ -147,7 +147,7 @@ ctrpp::types::TMD::TMD::~TMD()
 
 	for (u32 i = 0; i < this->ContentChunkRecords.size(); i++)
 	{
-		delete this->ContentChunkRecords [i];
+		delete this->ContentChunkRecords[i];
 	}
 }
 

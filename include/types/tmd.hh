@@ -24,6 +24,15 @@ namespace ctrpp
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 			};
 
+			typedef const enum class ContentTypeFlags
+			{
+				Encrypted = 0x1,
+				Disc      = 0x2,
+				CFM       = 0x4,
+				Optional  = 0x4000,
+				Shared    = 0x8000
+			};
+
 			typedef struct __attribute__((packed)) tmd_header
 			{
 				char issuer[0x40];

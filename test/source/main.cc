@@ -21,6 +21,12 @@ int main(int argc, char *argv[])
 		std::cout << "ok!" << std::endl;
 		
 		ctrpp::util::print_unicode(smdh.raw_smdh_data->title_names[1].short_desc, 0x40);
+
+		char hex[9];
+
+		snprintf(hex, 9, "%08x", smdh.region_lockout());
+
+		std::cout << "flag: 0x" << hex << std::endl;
 	}
 	else
 	{

@@ -12,6 +12,32 @@ namespace ctrpp
 	{
 		namespace SMDH
 		{
+			typedef const enum class SMDHRegionLockout
+			{
+				Japan     = 0x1,
+				USA       = 0x2,
+				Europe    = 0x4,
+				Australia = 0x8,
+				China     = 0x10,
+				Korea     = 0x20,
+				Taiwan    = 0x40
+			};
+
+			typedef const enum class SMDHFlags
+			{
+				VisibleOnHomeMenu        = 0x1,
+				AutoBootGamecard         = 0x2,
+				AllowUseOf3d             = 0x4,
+				RequireAcceptCtrEula     = 0x8,
+				AutoSaveOnExit           = 0x10,
+				UsesExtendedBanner       = 0x20,
+				RegionGameRatingRequired = 0x40,
+				UsesSaveData             = 0x80,
+				RecordUsageData          = 0x100,
+				DisableSdSaveDataBackups = 0x400,
+				New3dsExclusive          = 0x1000
+			};
+
 			typedef struct __attribute__((packed)) smdh_title_name
 			{	
 				char16 short_desc [0x40];
@@ -53,8 +79,6 @@ namespace ctrpp
 				float default_banner_animation_frame;
 				u32 cec_id;
 
-				//other stuff
-
 				u64 reserved_9;
 
 				// icons
@@ -75,7 +99,7 @@ namespace ctrpp
 				u32 region_lockout();
 				u32 match_maker_id();
 				u64 match_maker_bit_id();
-				u16 eula_version;
+				u16 eula_version();
 				float default_banner_animation_frame();
 				u32 cec_id();
 
