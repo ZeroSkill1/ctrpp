@@ -151,22 +151,22 @@ failed:
 	return;
 }
 
-// void ctrpp::crypto::Engine::set_normal(u8 slot, uint128_t key)
-// {
-// 	std::map<u8, u8 *>::iterator itr = this->normal_key.find(slot);
+void ctrpp::crypto::Engine::set_normal(u8 slot, uint128_t key)
+{
+	std::map<u8, u8 *>::iterator itr = this->normal_key.find(slot);
 
-// 	if (itr != this->normal_key.end())
-// 	{
-// 		ctrpp::ints::to_be_bytes(key, itr->second);
-// 		return;
-// 	}
+	if (itr != this->normal_key.end())
+	{
+		ctrpp::ints::to_be_bytes(key, itr->second);
+		return;
+	}
 
-// 	u8* set = new u8[KEY_SIZE];
+	u8* set = new u8[KEY_SIZE];
 
-// 	ctrpp::ints::to_be_bytes(key, set);
+	ctrpp::ints::to_be_bytes(key, set);
 
-// 	this->normal_key[slot] = set;
-// }
+	this->normal_key[slot] = set;
+}
 
 void ctrpp::crypto::Engine::copy_key_to_normal(u8 slot, u8 *key)
 {
@@ -185,15 +185,15 @@ void ctrpp::crypto::Engine::copy_key_to_normal(u8 slot, u8 *key)
 	this->normal_key[slot] = key_in;
 }
 
-// void ctrpp::crypto::Engine::ctr_keygen(u8 slot, uint128_t key_x, uint128_t key_y)
-// {
-// 	set_normal(slot, rotr(((rotl(key_x, 2) ^ key_y) + CTR_CONSTANT ), 41));
-// }
+void ctrpp::crypto::Engine::ctr_keygen(u8 slot, uint128_t key_x, uint128_t key_y)
+{
+	set_normal(slot, rotr(((rotl(key_x, 2) ^ key_y) + CTR_CONSTANT ), 41));
+}
 
-// void ctrpp::crypto::Engine::twl_keygen(u8 slot, uint128_t key_x, uint128_t key_y)
-// {
-// 	set_normal(slot, rotl(((key_x ^ key_y) + TWL_CONSTANT), 42));
-// }
+void ctrpp::crypto::Engine::twl_keygen(u8 slot, uint128_t key_x, uint128_t key_y)
+{
+	set_normal(slot, rotl(((key_x ^ key_y) + TWL_CONSTANT), 42));
+}
 
 ctrpp::crypto::Engine::~Engine()
 {

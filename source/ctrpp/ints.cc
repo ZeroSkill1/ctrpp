@@ -42,32 +42,80 @@ float ctrpp::ints::be_float(u8 *buf)
 	return f;
 }
 
-uint128_t ctrpp::ints::to_le_u128(u8 *buf)
+void ctrpp::ints::to_be_bytes(uint128_t in, u8 *buf)
 {
 #if __BYTE__ORDER__ == __ORDER__LITTLE__
-	u64 upper = _CTRPP_LE_U64((buf + 8));
-	u64 lower = _CTRPP_LE_U64(buf);
-#elif
-	u64 upper = _CTRPP_LE_U64(buf);
-	u64 lower = _CTRPP_LE_U64(buf + 8);
+	u64 lower = _CTRPP_BE_U64(BYTES(in.lower()));
+	u64 upper = _CTRPP_BE_U64(BYTES(in.upper()));
+
+	memcpy(buf + sizeof(u64), &lower, sizeof(u64)); //copy the lower part
+	memcpy(buf, &upper, sizeof(u64)); //copy the upper part
+
+#elif __BYTE__ORDER__ == __ORDER__BIG__
+	u64 lowerbe = _CTRPP_LE_U64(BYTES(in.lower()));
+	u64 upperbe = _CTRPP_LE_U64(BYTES(in.upper()));
+
+	memcpy(buf, &lower, sizeof(u64)); //copy the lower part
+	memcpy(buf + sizeof(u64), &upper, sizeof(u64)); //copy the upper part
 #else
 #error "Unsupported byte order"
 #endif
+}
 
-	return uint128_t(upper, lower);
+void ctrpp::ints::to_le_bytes(uint128_t in, u8 *buf)
+{
+#if __BYTE__ORDER__ == __ORDER__LITTLE__
+	u64 lower = _CTRPP_LE_U64(BYTES(in.lower()));
+	u64 upper = _CTRPP_LE_U64(BYTES(in.upper()));
+
+	memcpy(buf, &lower, sizeof(u64)); //copy the lower part
+	memcpy(buf + sizeof(u64), &upper, sizeof(u64)); //copy the upper part
+
+#elif __BYTE__ORDER__ == __ORDER__BIG__
+	u64 lowerbe = _CTRPP_BE_U64(BYTES(in.lower()));
+	u64 upperbe = _CTRPP_BE_U64(BYTES(in.upper()));
+
+	memcpy(buf + sizeof(u64), &lower, sizeof(u64)); //copy the lower part
+	memcpy(buf, &upper, sizeof(u64)); //copy the upper part
+#else
+#error "Unsupported byte order"
+#endif
 }
 
 uint128_t ctrpp::ints::to_be_u128(u8 *buf)
 {
+	uint128_t out = 0;
 #if __BYTE__ORDER__ == __ORDER__LITTLE__
-	u64 upper = _CTRPP_BE_U64((buf + 8));
-	u64 lower = _CTRPP_BE_U64(buf);
-#elif
+	u64 lower = _CTRPP_BE_U64((buf + 8));
 	u64 upper = _CTRPP_BE_U64(buf);
-	u64 lower = _CTRPP_BE_U64(buf + 8);
+
+	out = uint128_t(upper, lower);
+#elif __BYTE__ORDER__ == __ORDER__BIG__
+	u64 lowerbe = _CTRPP_LE_U64(buf);
+	u64 upperbe = _CTRPP_LE_U64((buf + 8));
+
+	out = uint128_t(upperbe, lowerbe);
 #else
 #error "Unsupported byte order"
 #endif
+	return out;
+}
 
-	return uint128_t(lower, upper);
+uint128_t ctrpp::ints::to_le_u128(u8 *buf)
+{
+	uint128_t out = 0;
+#if __BYTE__ORDER__ == __ORDER__LITTLE__
+	u64 lower = _CTRPP_LE_U64(buf);
+	u64 upper = _CTRPP_LE_U64((buf + 8));
+
+	out = uint128_t(upper, lower);
+#elif __BYTE__ORDER__ == __ORDER__BIG__
+	u64 lowerbe = _CTRPP_BE_U64((buf + 8));
+	u64 upperbe = _CTRPP_BE_U64(buf);
+
+	out = uint128_t(upperbe, lowerbe);
+#else
+#error "Unsupported byte order"
+#endif
+	return out;
 }

@@ -4,8 +4,12 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <ctrpp/constants.hh>
+//delete after testing
+#include <iostream>
+#include <stdio.h>
+
 #include <uint128_t/uint128_t.hh>
+#include <ctrpp/constants.hh>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
