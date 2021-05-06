@@ -73,6 +73,7 @@ ctrpp::crypto::Engine::Engine(const char *boot9_filename, bool dev)
 	switch (siz)
 	{
 	case 0x8000:
+		std::cout << "trying to hash file. (file size: 0x8000)\n";
 		if (util::crypto::hash_file_part_read(b9, hash, b9_dat, 0x0, B9_MINSIZE) != 0)
 		{
 			this->result = -5;
@@ -80,6 +81,7 @@ ctrpp::crypto::Engine::Engine(const char *boot9_filename, bool dev)
 		}
 		break;
 	case 0x10000:
+		std::cout << "trying to hash file. (file size: 0x10000)\n";
 		if (util::crypto::hash_file_part_read(b9, hash, b9_dat, 0x8000, B9_MINSIZE) != 0)
 		{
 			this->result = -5;

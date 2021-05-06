@@ -166,20 +166,32 @@ int ctrpp::util::crypto::hash_file_part_read(FILE *f, u8 *out_hash, u8 *out, u64
 	long to_read = get_hash_remaining(remaining, REGULAR_HASH_BUFSIZE);
 
 	if (!SHA256_Init(&ctx))
+	{
+		std::cout << "failed to initialize hashing context!\n";
 		goto failed;
+	}
 
 	if (fseek(f, offset, 0) == -1)
+	{
+		std::cout << "failed to seek to offset 0!\n";
 		goto failed;
+	}
 
 	while ((read = fread(buf, 1, to_read, f)) > 0)
 	{
 		memcpy(out + written, buf, read);
 
 		if (read != to_read)
+		{
+			std::cout << "amount of read bytes is not equal to amount of bytes expected to read!\n";
 			goto failed;
+		}
 
 		if (!SHA256_Update(&ctx, buf, to_read))
+		{
+			std::cout << "could not write data to hashing context!\n";
 			goto failed;
+		}
 
 		remaining -= read;
 		written += read;
@@ -187,7 +199,10 @@ int ctrpp::util::crypto::hash_file_part_read(FILE *f, u8 *out_hash, u8 *out, u64
 	}
 
 	if (!SHA256_Final(out_hash, &ctx))
+	{
+		std::cout << "could not finalize hash! (could not write hash to hash buffer!)\n";
 		goto failed;
+	}	
 
 	delete[] buf;
 	return 0;
