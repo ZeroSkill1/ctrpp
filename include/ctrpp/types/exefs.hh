@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include <util.hh>
-#include <ints.hh>
+#include <ctrpp/util.hh>
+#include <ctrpp/ints.hh>
 
 namespace ctrpp
 {

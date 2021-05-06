@@ -1,4 +1,4 @@
-#include <types/smdh.hh>
+#include <ctrpp/types/smdh.hh>
 
 ctrpp::types::SMDH::SMDH::SMDH()
 {
@@ -9,13 +9,13 @@ ctrpp::types::SMDH::SMDH::SMDH(const char *filename)
 	long siz = 0;
 	FILE *smdh = nullptr;
 
-	if ((siz = ctrpp::util::check_file(filename)) == -1)
+	if ((siz = ctrpp::util::io::check_file(filename)) == -1)
 		goto failed;
 
 	if (siz != sizeof(smdh_data))
 		goto failed;
 
-	smdh = fopen(filename, "r");
+	smdh = fopen64(filename, "r");
 
 	if (smdh == nullptr)
 		goto failed;

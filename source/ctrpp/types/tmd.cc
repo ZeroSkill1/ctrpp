@@ -1,4 +1,4 @@
-#include <types/tmd.hh>
+#include <ctrpp/types/tmd.hh>
 
 //tmd
 
@@ -11,7 +11,7 @@ ctrpp::types::TMD::TMD::TMD(const char *filename)
 	u32 sig_type;
 	u8 *cir_buf = new u8[0x24];
 
-	FILE *f = fopen(filename, "r");
+	FILE *f = fopen64(filename, "r");
 
 	if (f == nullptr)
 		goto failed;

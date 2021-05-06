@@ -4,8 +4,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <ints.hh>
-#include <sig.hh>
+#include <ctrpp/ints.hh>
+#include <ctrpp/sig.hh>
 
 namespace ctrpp
 {

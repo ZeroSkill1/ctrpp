@@ -1,6 +1,7 @@
 #include <string.h>
-#include <sig.hh>
 #include <stdio.h>
+
+#include <ctrpp/sig.hh>
 
 ctrpp::Signature::Signature()
 {

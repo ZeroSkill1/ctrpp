@@ -1,6 +1,6 @@
 
 # Program settings
-INCLUDES	:=	include ../include
+INCLUDES	:=	include ../include/
 LIBRARIES	:= -L.. -lctrpp -lcrypto -lssl
 SOURCES		:=	source
 TARGET		:= ctrpp-test

@@ -1,4 +1,4 @@
-#include <types/ticket.hh>
+#include <ctrpp/types/ticket.hh>
 
 ctrpp::types::Ticket::Ticket::Ticket()
 {
@@ -10,7 +10,7 @@ ctrpp::types::Ticket::Ticket::Ticket(const char *filename)
 	long streampos;
 	u32 cindex_size;
 
-	FILE *tik = fopen(filename, "r");
+	FILE *tik = fopen64(filename, "r");
 
 	if (tik == nullptr)
 		goto failed;

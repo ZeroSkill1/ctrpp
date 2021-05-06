@@ -1,7 +1,7 @@
 #ifndef __sig_hh
 #define __sig_hh
 
-#include <ints.hh>
+#include <ctrpp/ints.hh>
 
 namespace ctrpp
 {

@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <vector>
 
-#include <ints.hh>
-#include <sig.hh>
+#include <ctrpp/ints.hh>
+#include <ctrpp/sig.hh>
 
 namespace ctrpp
 {

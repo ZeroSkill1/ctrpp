@@ -1,4 +1,4 @@
-#include <types/exefs.hh>
+#include <ctrpp/types/exefs.hh>
 
 ctrpp::types::ExeFS::ExeFS::ExeFS()
 {
@@ -10,10 +10,10 @@ ctrpp::types::ExeFS::ExeFS::ExeFS(const char *filename)
 	long siz = 0;
 	int exefs_fsizes = 0;
 
-	if ((siz = util::check_file(filename)) == -1)
+	if ((siz = util::io::check_file(filename)) == -1)
 		goto failed;
 
-	exefs = fopen(filename, "r");
+	exefs = fopen64(filename, "r");
 
 	if (exefs == nullptr)
 		goto failed;
@@ -59,7 +59,7 @@ bool ctrpp::types::ExeFS::ExeFS::verify()
 
 	for (u32 i = 0; i < this->file_entries.size(); i++)
 	{
-		if (ctrpp::util::hash::sha256::hash_file_part(this->exefs_f, hash, sizeof(exefs_header) + this->file_entries[i]->file_offset, this->file_entries[i]->file_size) != 0)
+		if (ctrpp::util::crypto::hash_file_part(this->exefs_f, hash, sizeof(exefs_header) + this->file_entries[i]->file_offset, this->file_entries[i]->file_size) != 0)
 			goto failed;
 
 		if (memcmp(this->header->file_hashes[hashcount], hash, 0x20) != 0)
