@@ -4,10 +4,6 @@
 #include <stdint.h>
 #include <string.h>
 
-//delete after testing
-#include <iostream>
-#include <stdio.h>
-
 #include <uint128_t/uint128_t.hh>
 #include <ctrpp/constants.hh>
 
