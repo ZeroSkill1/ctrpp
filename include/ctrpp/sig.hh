@@ -1,6 +1,7 @@
 #ifndef __sig_hh
 #define __sig_hh
 
+#include <ctrpp/exceptions.hh>
 #include <ctrpp/ints.hh>
 
 namespace ctrpp
@@ -41,7 +42,7 @@ namespace ctrpp
 		SignatureType sig_type;
 		u32 sig_size;
 		u32 sig_padding_size;
-		u32 full_size;
+		s32 full_size;
 
 		u8 *sig = nullptr;
 		u8 *sig_padding = nullptr;

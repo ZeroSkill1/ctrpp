@@ -4,8 +4,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <ctrpp/exceptions.hh>
+#include <ctrpp/util/io.hh>
 #include <ctrpp/ints.hh>
-#include <ctrpp/util.hh>
 
 namespace ctrpp
 {
@@ -92,8 +93,6 @@ namespace ctrpp
 			public:
 				SMDH();
 				SMDH(const char *filename);
-
-				bool success_parsed;
 
 				smdh_data *raw_smdh_data = nullptr;
 

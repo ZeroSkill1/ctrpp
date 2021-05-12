@@ -3,11 +3,14 @@
 
 #include <ctrpp/sig.hh>
 
-ctrpp::Signature::Signature()
+using namespace ctrpp;
+using namespace exceptions::sig;
+
+Signature::Signature()
 {
 }
 
-ctrpp::Signature::Signature(u32 sig_type)
+Signature::Signature(u32 sig_type)
 {
 	switch (sig_type)
 	{
@@ -42,7 +45,7 @@ ctrpp::Signature::Signature(u32 sig_type)
 		this->sig_size = (u32)SignatureSize::ECDSA_SHA256;
 		break;
 	default:
-		this->full_size = 0;
+		this->full_size = -1;
 		return;
 	}
 
@@ -52,11 +55,11 @@ ctrpp::Signature::Signature(u32 sig_type)
 	this->sig_padding = new u8[this->sig_padding_size];
 }
 
-ctrpp::Signature::~Signature()
+Signature::~Signature()
 {
-	if (this->sig != nullptr)
-	{
+	if (this->sig != nullptr) 
 		delete[] this->sig;
+
+	if (this->sig_padding != nullptr)
 		delete[] this->sig_padding;
-	}
 };

@@ -7,7 +7,9 @@
 
 #include <vector>
 
-#include <ctrpp/util.hh>
+#include <ctrpp/exceptions.hh>
+#include <ctrpp/util/tools.hh>
+#include <ctrpp/util/io.hh>
 #include <ctrpp/ints.hh>
 
 namespace ctrpp
@@ -47,9 +49,7 @@ namespace ctrpp
 
 				exefs_header *header = nullptr;
 
-				bool success_parsed;
-
-				int export_entry(const char *filename, const char *entry_name);
+				void export_entry(const char *filename, const char *entry_name);
 				bool verify();
 
 				~ExeFS();

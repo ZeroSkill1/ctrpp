@@ -4,8 +4,10 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <ctrpp/exceptions.hh>
 #include <ctrpp/ints.hh>
 #include <ctrpp/sig.hh>
+#include <ctrpp/util/io.hh>
 
 namespace ctrpp
 {
@@ -56,8 +58,6 @@ namespace ctrpp
 				Signature *signature = nullptr;
 				ticket_data *raw_ticket_data = nullptr;
 				TicketContentIndex *content_index = nullptr;
-
-				bool success_parsed;
 
 				Ticket();
 				Ticket(const char *filename);

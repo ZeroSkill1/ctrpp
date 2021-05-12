@@ -9,15 +9,16 @@
 #include <map>
 #include <bit>
 
+#include <ctrpp/exceptions.hh>
 #include <ctrpp/ints.hh>
-#include <ctrpp/util.hh>
+#include <ctrpp/util/io.hh>
 
 namespace ctrpp
 {
 	namespace crypto
 	{
-		static const u8 B9_HASH[0x20] = { 0x73, 0x31, 0xF7, 0xED, 0xEC, 0xE3, 0xDD, 0x33, 0xF2, 0xAB, 0x4B, 0xD0, 0xB3, 0xA5, 0xD6, 0x07, 0x22, 0x9F, 0xD1, 0x92, 0x12, 0xC1, 0x0B, 0x73, 0x4C, 0xED, 0xCA, 0xF7, 0x8C, 0x1A, 0x7B, 0x98 };
-		static const u8 DEV_COMMON_KEY_0[0x10] = { 0x55, 0xA3, 0xF8, 0x72, 0xBD, 0xC8, 0x0C, 0x55, 0x5A, 0x65, 0x43, 0x81, 0x13, 0x9E, 0x15, 0x3B  };
+		static const u8 B9_HASH[0x20] = {0x73, 0x31, 0xF7, 0xED, 0xEC, 0xE3, 0xDD, 0x33, 0xF2, 0xAB, 0x4B, 0xD0, 0xB3, 0xA5, 0xD6, 0x07, 0x22, 0x9F, 0xD1, 0x92, 0x12, 0xC1, 0x0B, 0x73, 0x4C, 0xED, 0xCA, 0xF7, 0x8C, 0x1A, 0x7B, 0x98};
+		static const u8 DEV_COMMON_KEY_0[0x10] = {0x55, 0xA3, 0xF8, 0x72, 0xBD, 0xC8, 0x0C, 0x55, 0x5A, 0x65, 0x43, 0x81, 0x13, 0x9E, 0x15, 0x3B};
 
 		static const uint128_t CTR_CONSTANT = uint128_t("42503689118608475533858958821215598218");
 		static const uint128_t TWL_CONSTANT = uint128_t("340277079404625077361735292783915122297");
@@ -54,21 +55,6 @@ namespace ctrpp
 			BOOT9_INTERNAL    = 0x3F
 		};
 
-		void print_error(int code);
-
-		static const std::map<int, const char *> err = std::map<int, const char *>
-		(
-			{
-				{  0, "[BOOT9] Success\n" },
-				{ -1, "[ERROR] [BOOT9] Could not stat file\n" },
-				{ -2, "[ERROR] [BOOT9] File has incorrect size (allowed sizes: 0x8000, 0x10000)\n" },
-				{ -3, "[ERROR] [BOOT9] Could not open file for reading\n" },
-				{ -4, "[ERROR] [BOOT9] Could not read enough data from file\n" },
-				{ -5, "[ERROR] [BOOT9] Unable to hash file\n" },
-				{ -6, "[ERROR] [BOOT9] Hash mismatch - data invalid or corrupt\n" },
-			}
-		);
-
 		class Engine
 		{
 		public:
@@ -76,7 +62,7 @@ namespace ctrpp
 			std::map<u8, uint128_t> key_x;
 			std::map<u8, u8 *> normal_key;
 
-			bool is_dev;
+			bool is_dev = false;
 			int result;
 
 			Engine();
@@ -87,6 +73,7 @@ namespace ctrpp
 			void copy_key_to_normal(u8 slot, u8 *key);
 
 			~Engine();
+
 		private:
 			void set_normal(u8 slot, uint128_t key);
 		};

@@ -1,78 +1,73 @@
 #include <ctrpp/types/smdh.hh>
 
-ctrpp::types::SMDH::SMDH::SMDH()
+using namespace ctrpp::exceptions::fs;
+using namespace ctrpp::types::SMDH;
+using namespace ctrpp::util::io;
+
+SMDH::SMDH()
 {
 }
 
-ctrpp::types::SMDH::SMDH::SMDH(const char *filename)
+SMDH::SMDH(const char *filename)
 {
-	long siz = 0;
 	FILE *smdh = nullptr;
 
-	if ((siz = ctrpp::util::io::check_file(filename)) == -1)
-		goto failed;
+	off_t siz = 0;
+
+	smdh = open_file(filename, "r", &siz);
 
 	if (siz != sizeof(smdh_data))
-		goto failed;
-
-	smdh = fopen64(filename, "r");
-
-	if (smdh == nullptr)
-		goto failed;
+	{
+		fclose(smdh);
+		throw InvalidFileSizeException(filename, siz, sizeof(smdh_data));
+	}
 
 	this->raw_smdh_data = new smdh_data;
 
 	if (!fread(this->raw_smdh_data, 1, sizeof(smdh_data), smdh))
-		goto failed;
+	{
+		this->~SMDH();
+
+		fclose(smdh);
+		
+		throw FileReadException();
+	}
 
 	fclose(smdh);
-
-	this->success_parsed = true;
-
-	return;
-
-failed:
-
-	if (smdh != nullptr)
-		fclose(smdh);
-
-	this->success_parsed = false;
-
-	return;
 }
 
-ctrpp::types::SMDH::SMDH::~SMDH()
+SMDH::~SMDH()
 {
 	if (this->raw_smdh_data != nullptr)
 		delete this->raw_smdh_data;
 }
 
-u32 ctrpp::types::SMDH::SMDH::region_lockout()
+u32 SMDH::SMDH::region_lockout()
 {
 	return _CTRPP_LE_U32(BYTES(this->raw_smdh_data->region_lockout));
 }
 
-u32 ctrpp::types::SMDH::SMDH::match_maker_id()
+u32 SMDH::SMDH::match_maker_id()
 {
 	return _CTRPP_LE_U32(BYTES(this->raw_smdh_data->match_maker_id));
 }
 
-u64 ctrpp::types::SMDH::SMDH::match_maker_bit_id()
+u64 SMDH::SMDH::match_maker_bit_id()
 {
 	return _CTRPP_LE_U64(BYTES(this->raw_smdh_data->match_maker_bit_id));
 }
 
-u16 ctrpp::types::SMDH::SMDH::eula_version()
+u16 SMDH::SMDH::eula_version()
 {
 	return _CTRPP_LE_U16(BYTES(this->raw_smdh_data->eula_version));
 }
 
-float ctrpp::types::SMDH::SMDH::default_banner_animation_frame()
+float SMDH::SMDH::default_banner_animation_frame()
 {
 	return ints::le_float(BYTES(this->raw_smdh_data->default_banner_animation_frame));
 }
 
-u32 ctrpp::types::SMDH::SMDH::cec_id()
+u32 SMDH::SMDH::cec_id()
 {
 	return _CTRPP_LE_U32(BYTES(this->raw_smdh_data->cec_id));
 }

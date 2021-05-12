@@ -1,97 +1,115 @@
 #include <ctrpp/types/ticket.hh>
 
-ctrpp::types::Ticket::Ticket::Ticket()
+using namespace ctrpp::exceptions::fs;
+using namespace ctrpp::types::Ticket;
+using namespace ctrpp::util::io;
+
+Ticket::Ticket()
 {
 }
 
-ctrpp::types::Ticket::Ticket::Ticket(const char *filename)
+Ticket::Ticket(const char *filename)
 {
-	u32 sig_type;
-	long streampos;
-	u32 cindex_size;
+	FILE *tik = nullptr;
+	u32 tmp;
+	s32 tmp2;
 
-	FILE *tik = fopen64(filename, "r");
+	tik = open_file_nsz(filename, "r");
 
-	if (tik == nullptr)
-		goto failed;
-
-	if (!fread(&sig_type, 1, 4, tik))
-		goto failed;
-
-	sig_type = _CTRPP_BE_U32(((u8 *)(&sig_type)));
-
-	this->signature = new Signature(sig_type);
-
-	if (!(this->signature->full_size > 0))
-		goto failed;
-
-	if (!fread(this->signature->sig, 1, this->signature->sig_size, tik))
-		goto failed;
-	if (!fread(this->signature->sig_padding, 1, this->signature->sig_padding_size, tik))
-		goto failed;
-
-	this->raw_ticket_data = new ticket_data;
-
-	if (!fread(this->raw_ticket_data, 1, sizeof(ticket_data), tik))
-		goto failed;
-	if (!(streampos = ftell(tik)))
-		goto failed;
-	if (fseek(tik, streampos + 4, SEEK_SET) == -1)
-		goto failed; // seek to cindex size pos
-	if (!fread(&cindex_size, 1, 4, tik))
-		goto failed;
-
-	cindex_size = _CTRPP_BE_U32(((u8 *)(&cindex_size)));
-
-	this->content_index = new TicketContentIndex(cindex_size);
-
-	if (fseek(tik, streampos, 0) == -1)
-		goto failed;
-	if (!fread(this->content_index->content_index_data, 1, this->content_index->size, tik))
-		goto failed;
-
-	fclose(tik);
-
-	this->success_parsed = true;
-
-	return;
-
-failed:
-
-	if (tik != nullptr)
+	if (fread(&tmp, 1, 4, tik) != 4)
+	{
 		fclose(tik);
 
-	this->success_parsed = false;
+		throw FileReadException(filename);
+	}
 
-	return;
+	tmp = _CTRPP_BE_U32(BYTES(tmp));
+
+	this->signature = new Signature(tmp);
+	this->raw_ticket_data = new ticket_data;
+
+	if (
+		fread(this->signature->sig, 1, this->signature->sig_size, tik) != this->signature->sig_size ||
+	    fread(this->signature->sig_padding, 1, this->signature->sig_padding_size, tik) != this->signature->sig_padding_size ||
+		fread(this->raw_ticket_data, 1, sizeof(ticket_data), tik) != sizeof(ticket_data) ||
+		fread(&tmp, 1, 4, tik) != 4 ||
+		fread(&tmp, 1, 4, tik) != 4
+	)
+	{
+		delete this->signature; 
+		delete this->raw_ticket_data;
+
+		fclose(tik);
+
+		throw FileReadException(filename);
+	}
+
+	tmp = _CTRPP_BE_U32(BYTES(tmp));
+
+	this->content_index = new TicketContentIndex(tmp);
+
+	if ((tmp2 = ftell(tik)) == -1)
+	{
+		delete this->signature; 
+		delete this->raw_ticket_data;
+		delete this->content_index;
+
+		fclose(tik);
+
+		throw FileException("Could not get position of file stream");
+	}
+
+	if (fseek(tik, tmp2 - 1, 0) == -1)
+	{
+		delete this->signature; 
+		delete this->raw_ticket_data;
+		delete this->content_index;
+
+		fclose(tik);
+
+		throw FileSeekException(filename, tmp2 - 1);
+	}
+
+	if (fread(this->content_index->content_index_data, 1, this->content_index->size, tik) != this->content_index->size)
+	{
+		delete this->signature; 
+		delete this->raw_ticket_data;
+		delete this->content_index;
+
+		fclose(tik);
+
+		throw FileReadException(filename);
+	}
+
+	fclose(tik);
 }
 
-u64 ctrpp::types::Ticket::Ticket::ticket_id()
+u64 Ticket::Ticket::ticket_id()
 {
-	return _CTRPP_BE_U64(((u8 *)(&(this->raw_ticket_data->ticket_id))));
+	return _CTRPP_BE_U64(BYTES(this->raw_ticket_data->ticket_id));
 }
 
-u32 ctrpp::types::Ticket::Ticket::console_id()
+u32 Ticket::Ticket::console_id()
 {
-	return _CTRPP_BE_U32(((u8 *)(&(this->raw_ticket_data->console_id))));
+	return _CTRPP_BE_U32(BYTES(this->raw_ticket_data->console_id));
 }
 
-u64 ctrpp::types::Ticket::Ticket::title_id()
+u64 Ticket::Ticket::title_id()
 {
-	return _CTRPP_BE_U64(((u8 *)(&(this->raw_ticket_data->title_id))));
+	return _CTRPP_BE_U64(BYTES(this->raw_ticket_data->title_id));
 }
 
-u16 ctrpp::types::Ticket::Ticket::ticket_title_version()
+u16 Ticket::ticket_title_version()
 {
-	return _CTRPP_BE_U16(((u8 *)(&(this->raw_ticket_data->ticket_title_version))));
+	return _CTRPP_BE_U16(BYTES(this->raw_ticket_data->ticket_title_version));
 }
 
-u32 ctrpp::types::Ticket::Ticket::eshop_account_id()
+u32 Ticket::eshop_account_id()
 {
-	return _CTRPP_BE_U32(((u8 *)(&(this->raw_ticket_data->eshop_account_id))));
+	return _CTRPP_BE_U32(BYTES(this->raw_ticket_data->eshop_account_id));
 }
 
-ctrpp::types::Ticket::Ticket::~Ticket()
+Ticket::~Ticket()
 {
 	if (!(this->signature == nullptr))
 		delete this->signature;
@@ -101,17 +119,17 @@ ctrpp::types::Ticket::Ticket::~Ticket()
 		delete this->content_index;
 }
 
-ctrpp::types::Ticket::TicketContentIndex::TicketContentIndex()
+TicketContentIndex::TicketContentIndex()
 {
 }
 
-ctrpp::types::Ticket::TicketContentIndex::TicketContentIndex(u32 size)
+TicketContentIndex::TicketContentIndex(u32 size)
 {
 	this->size = size;
 	this->content_index_data = new u8[size];
 }
 
-ctrpp::types::Ticket::TicketContentIndex::~TicketContentIndex()
+TicketContentIndex::~TicketContentIndex()
 {
 	if (!(this->content_index_data == nullptr))
 		delete[] this->content_index_data;

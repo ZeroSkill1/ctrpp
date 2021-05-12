@@ -2,7 +2,7 @@
 # Program settings
 INCLUDES	:=	include include/uint128_t .
 LIBRARIES	:=
-SOURCES		:=	source/uint128_t source/ctrpp source/ctrpp/types
+SOURCES		:=	source/uint128_t source/ctrpp source/ctrpp/types source/ctrpp/util
 TARGET		:=	libctrpp.a
 
 # Language settings

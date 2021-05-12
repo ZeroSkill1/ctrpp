@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <vector>
 
+#include <ctrpp/exceptions.hh>
+#include <ctrpp/util/io.hh>
 #include <ctrpp/ints.hh>
 #include <ctrpp/sig.hh>
 
@@ -14,7 +16,7 @@ namespace ctrpp
 	{
 		namespace TMD
 		{
-			static const u8 empty_inforecord[0x24] =
+			static const u8 EMPTY_INFO_RECORD[0x24] =
 				{
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -80,7 +82,7 @@ namespace ctrpp
 				ContentInfoRecord();
 				ContentInfoRecord(tmd_content_info_record *info);
 
-				u16 contnet_index_offset();
+				u16 content_index_offset();
 				u16 content_command_count();
 
 				~ContentInfoRecord();
@@ -111,8 +113,6 @@ namespace ctrpp
 				std::vector<ContentInfoRecord *> ContentInfoRecords;
 				std::vector<ContentChunkRecord *> ContentChunkRecords;
 
-				bool success_parsed;
-
 				TMD(const char *filename);
 				TMD();
 
@@ -127,6 +127,10 @@ namespace ctrpp
 				u16 boot_content();
 
 				~TMD();
+
+			private:
+				void delete_info_records();
+				void delete_chunk_records();
 			};
 		}
 	}

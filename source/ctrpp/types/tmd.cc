@@ -1,60 +1,87 @@
 #include <ctrpp/types/tmd.hh>
 
+using namespace ctrpp::exceptions::sig;
+using namespace ctrpp::exceptions::fs;
+using namespace ctrpp::types::TMD;
+using namespace ctrpp::util::io;
+
 //tmd
 
-ctrpp::types::TMD::TMD::TMD()
+TMD::TMD()
 {
 }
 
-ctrpp::types::TMD::TMD::TMD(const char *filename)
+TMD::TMD(const char *filename)
 {
+	u8 buf[CHUNK_RECORD_SIZE]; //using chunk record size, because this buffer will be used to copy both chunk AND info records.
 	u32 sig_type;
-	u8 *cir_buf = new u8[0x24];
 
-	FILE *f = fopen64(filename, "r");
+	FILE *f = nullptr;
 
-	if (f == nullptr)
-		goto failed;
+	f = open_file_nsz(filename, "r");
 
-	if (!fread(&sig_type, 1, 4, f))
-		goto failed;
+	if (fread(&sig_type, 1, 4, f) != 4)
+	{
+		fclose(f);
 
-	sig_type = _CTRPP_BE_U32(((u8 *)(&sig_type)));
+		throw FileReadException(filename);
+	}
+
+	sig_type = _CTRPP_BE_U32(BYTES(sig_type));
 
 	this->signature = new ctrpp::Signature(sig_type);
 
-	if (!(this->signature->full_size > 0)) //return bad if sig is not supported
-		goto failed;
-	if (!fread(this->signature->sig, 1, this->signature->sig_size, f))
-		goto failed;
-	if (!fread(this->signature->sig_padding, 1, this->signature->sig_padding_size, f))
-		goto failed;
+	if (this->signature->full_size == -1) //return bad if sig type is not supported
+	{
+		delete this->signature;
+
+		fclose(f);
+
+		throw InvalidSignatureTypeException(sig_type);
+	}
+
 	this->raw_tmd_header_data = new tmd_header;
-	if (!fread(this->raw_tmd_header_data, 1, sizeof(tmd_header), f))
-		goto failed;
+
+	if (
+		fread(this->signature->sig, 1, this->signature->sig_size, f) != this->signature->sig_size ||
+		fread(this->signature->sig_padding, 1, this->signature->sig_padding_size, f) != this->signature->sig_padding_size ||
+		fread(this->raw_tmd_header_data, 1, sizeof(tmd_header), f) != sizeof(tmd_header))
+	{
+		delete this->signature;
+		delete this->raw_tmd_header_data;
+
+		fclose(f);
+
+		throw FileReadException(filename);
+	}
 
 	//read content info records
 
 	this->ContentInfoRecords = std::vector<ContentInfoRecord *>();
 
-	for (u32 i = 0; i < 64; i++)
+	for (u32 i = 0; i < INFO_RECORD_AMOUNT; i++)
 	{
-		if (!(fread(cir_buf, 1, 0x24, f) > 0))
+		if (fread(buf, 1, INFO_RECORD_SIZE, f) != INFO_RECORD_SIZE)
 		{
-			goto failed;
+			delete this->signature;
+			delete this->raw_tmd_header_data;
+
+			delete_info_records();
+
+			fclose(f);
+
+			throw FileReadException(filename);
 		}
 
-		if (!(memcmp(cir_buf, empty_inforecord, 0x24) == 0))
+		if (!(memcmp(buf, EMPTY_INFO_RECORD, INFO_RECORD_SIZE) == 0))
 		{
 			tmd_content_info_record *record = new tmd_content_info_record;
 
-			memcpy(record, cir_buf, 0x24);
+			memcpy(record, buf, INFO_RECORD_SIZE);
 
 			this->ContentInfoRecords.push_back(new ContentInfoRecord(record));
 		}
 	}
-
-	delete[] cir_buf;
 
 	//read content chunk records
 
@@ -62,163 +89,153 @@ ctrpp::types::TMD::TMD::TMD(const char *filename)
 
 	for (u16 i = 0; i < this->content_count(); i++)
 	{
+		if (fread(buf, 1, CHUNK_RECORD_SIZE, f) != CHUNK_RECORD_SIZE)
+		{
+			delete this->signature;
+			delete this->raw_tmd_header_data;
+
+			delete_info_records();
+			delete_chunk_records();
+
+			fclose(f);
+
+			throw FileReadException(filename);
+		}
+
 		tmd_content_chunk_record *chunk = new tmd_content_chunk_record;
 
-		if ((fread(chunk, 1, 0x30, f) > 0))
-		{
-			this->ContentChunkRecords.push_back(new ContentChunkRecord(chunk));
-		}
-		else
-		{
-			delete chunk;
-			goto failed;
-		}
+		memcpy(chunk, buf, CHUNK_RECORD_SIZE);
+
+		ContentChunkRecord *record = new ContentChunkRecord(chunk);
+		this->ContentChunkRecords.push_back(record);
 	}
 
 	fclose(f);
-
-	this->success_parsed = true;
-	return;
-
-failed:
-	if (f != nullptr)
-		fclose(f);
-
-	if (cir_buf != nullptr)
-		delete[] cir_buf;
-
-	this->success_parsed = false;
-	return;
 }
 
-u64 ctrpp::types::TMD::TMD::title_id()
+u64 TMD::title_id()
 {
-	return _CTRPP_BE_U64(((u8 *)(&(this->raw_tmd_header_data->title_id))));
+	return _CTRPP_BE_U64(BYTES(this->raw_tmd_header_data->title_id));
 }
 
-u32 ctrpp::types::TMD::TMD::title_type()
+u32 TMD::title_type()
 {
-	return _CTRPP_BE_U32(((u8 *)(&(this->raw_tmd_header_data->title_type))));
+	return _CTRPP_BE_U32(BYTES(this->raw_tmd_header_data->title_type));
 }
 
-u16 ctrpp::types::TMD::TMD::group_id()
+u16 TMD::group_id()
 {
-	return _CTRPP_BE_U16(((u8 *)(&(this->raw_tmd_header_data->group_id))));
+	return _CTRPP_BE_U16(BYTES(this->raw_tmd_header_data->group_id));
 }
 
-//le stuff
-
-u32 ctrpp::types::TMD::TMD::save_size()
+u32 TMD::save_size()
 {
-	return _CTRPP_LE_U32(((u8 *)(&(this->raw_tmd_header_data->save_size))));
+	return _CTRPP_LE_U32(BYTES(this->raw_tmd_header_data->save_size));
 }
 
-u32 ctrpp::types::TMD::TMD::srl_private_save_data_size()
+u32 TMD::srl_private_save_data_size()
 {
-	return _CTRPP_LE_U32(((u8 *)(&(this->raw_tmd_header_data->srl_private_save_data_size))));
+	return _CTRPP_LE_U32(BYTES(this->raw_tmd_header_data->srl_private_save_data_size));
 }
 
-//end le stuff
-
-u16 ctrpp::types::TMD::TMD::title_version()
+u16 TMD::title_version()
 {
-	return _CTRPP_BE_U16(((u8 *)(&(this->raw_tmd_header_data->title_version))));
+	return _CTRPP_BE_U16(BYTES(this->raw_tmd_header_data->title_version));
 }
 
-u16 ctrpp::types::TMD::TMD::content_count()
+u16 TMD::content_count()
 {
-	return _CTRPP_BE_U16(((u8 *)(&(this->raw_tmd_header_data->content_count))));
+	return _CTRPP_BE_U16(BYTES(this->raw_tmd_header_data->content_count));
 }
 
-u16 ctrpp::types::TMD::TMD::boot_content()
+u16 TMD::boot_content()
 {
-	return _CTRPP_BE_U16(((u8 *)(&(this->raw_tmd_header_data->boot_content))));
+	return _CTRPP_BE_U16(BYTES(this->raw_tmd_header_data->boot_content));
 }
 
-ctrpp::types::TMD::TMD::~TMD()
+TMD::~TMD()
 {
 	if (this->raw_tmd_header_data != nullptr)
 		delete this->raw_tmd_header_data;
 	if (this->signature != nullptr)
 		delete this->signature;
 
-	for (u32 i = 0; i < this->ContentInfoRecords.size(); i++)
-	{
-		delete this->ContentInfoRecords[i];
-	}
-
-	for (u32 i = 0; i < this->ContentChunkRecords.size(); i++)
-	{
-		delete this->ContentChunkRecords[i];
-	}
+	this->delete_info_records();
+	this->delete_chunk_records();
 }
 
-//end tmd
+void TMD::delete_info_records()
+{
+	for (size_t i = 0; i < this->ContentInfoRecords.size(); i++)
+		delete this->ContentInfoRecords[i];
+}
 
-//start content info record
+void TMD::delete_chunk_records()
+{
+	for (size_t i = 0; i < this->ContentChunkRecords.size(); i++)
+		delete this->ContentChunkRecords[i];
+}
 
-ctrpp::types::TMD::ContentInfoRecord::ContentInfoRecord()
+//content info record
+
+ContentInfoRecord::ContentInfoRecord()
 {
 }
 
-ctrpp::types::TMD::ContentInfoRecord::ContentInfoRecord(tmd_content_info_record *info)
+ContentInfoRecord::ContentInfoRecord(tmd_content_info_record *info)
 {
 	this->raw_info_record_data = info;
 }
 
-u16 ctrpp::types::TMD::ContentInfoRecord::contnet_index_offset()
+u16 ContentInfoRecord::content_index_offset()
 {
-	return _CTRPP_BE_U16(((u8 *)(&(this->raw_info_record_data->content_index_offset))));
+	return _CTRPP_BE_U16(BYTES(this->raw_info_record_data->content_index_offset));
 }
 
-u16 ctrpp::types::TMD::ContentInfoRecord::content_command_count()
+u16 ContentInfoRecord::content_command_count()
 {
-	return _CTRPP_BE_U16(((u8 *)(&(this->raw_info_record_data->content_command_count))));
+	return _CTRPP_BE_U16(BYTES(this->raw_info_record_data->content_command_count));
 }
 
-ctrpp::types::TMD::ContentInfoRecord::~ContentInfoRecord()
+ContentInfoRecord::~ContentInfoRecord()
 {
 	if (this->raw_info_record_data != nullptr)
 		delete this->raw_info_record_data;
 }
 
-//end content info record
+//content chunk record
 
-//start content chunk record
-
-ctrpp::types::TMD::ContentChunkRecord::ContentChunkRecord()
+ContentChunkRecord::ContentChunkRecord()
 {
 }
 
-ctrpp::types::TMD::ContentChunkRecord::ContentChunkRecord(tmd_content_chunk_record *chunk)
+ContentChunkRecord::ContentChunkRecord(tmd_content_chunk_record *chunk)
 {
 	this->raw_chunk_record_data = chunk;
 }
 
-u32 ctrpp::types::TMD::ContentChunkRecord::content_id()
+u32 ContentChunkRecord::content_id()
 {
-	return _CTRPP_BE_U32(((u8 *)(&(this->raw_chunk_record_data->content_id))));
+	return _CTRPP_BE_U32(BYTES(this->raw_chunk_record_data->content_id));
 }
 
-u16 ctrpp::types::TMD::ContentChunkRecord::content_index()
+u16 ContentChunkRecord::content_index()
 {
-	return _CTRPP_BE_U16(((u8 *)(&(this->raw_chunk_record_data->content_index))));
+	return _CTRPP_BE_U16(BYTES(this->raw_chunk_record_data->content_index));
 }
 
-u16 ctrpp::types::TMD::ContentChunkRecord::content_type()
+u16 ContentChunkRecord::content_type()
 {
-	return _CTRPP_BE_U16(((u8 *)(&(this->raw_chunk_record_data->content_type))));
+	return _CTRPP_BE_U16(BYTES(this->raw_chunk_record_data->content_type));
 }
 
-u64 ctrpp::types::TMD::ContentChunkRecord::content_size()
+u64 ContentChunkRecord::content_size()
 {
-	return _CTRPP_BE_U64(((u8 *)(&(this->raw_chunk_record_data->content_size))));
+	return _CTRPP_BE_U64(BYTES(this->raw_chunk_record_data->content_size));
 }
 
-ctrpp::types::TMD::ContentChunkRecord::~ContentChunkRecord()
+ContentChunkRecord::~ContentChunkRecord()
 {
 	if (this->raw_chunk_record_data != nullptr)
 		delete this->raw_chunk_record_data;
 }
-
-//end content info record
